@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تحديك الفردي — تطبيقات الإنترنت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1128; --panel:#191f47; --gold:#f2a93b; --teal:#5fd8cf; --text:#eef0fb; --muted:#9aa2cf;
+  --line:rgba(242,169,59,.25); --good:#5fd8a0; --bad:#e2586b;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{background:radial-gradient(circle at 50% -10%, #1b234f, var(--bg) 60%); color:var(--text); font-family:'Tajawal',sans-serif; min-height:100svh; display:flex; flex-direction:column; align-items:center;}
+.mono{font-family:'JetBrains Mono',monospace; direction:ltr;}
+.screen{width:100%; max-width:480px; padding:26px 6vw 40px; text-align:center; flex:1; display:flex; flex-direction:column; justify-content:center;}
+h1{font-size:clamp(22px,7vw,30px); font-weight:900;}
+h1 span{color:var(--gold);}
+.sub{color:var(--muted); font-size:14px; margin:12px auto 0; max-width:40ch; line-height:1.8;}
+.hidden{display:none !important;}
+
+/* start */
+#nameRow{margin:22px auto 4px;}
+#playerName{background:var(--panel); border:1px solid var(--line); color:var(--text); padding:13px 16px; border-radius:8px; font-family:'Tajawal',sans-serif; font-size:15px; width:100%; text-align:center;}
+.bigbtn{background:var(--gold); color:#191026; border:none; padding:15px 30px; border-radius:10px; font-weight:900; font-size:16px; cursor:pointer; margin-top:16px; width:100%;}
+.bigbtn:hover{background:var(--teal);}
+.bestbox{margin-top:22px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; font-size:13px; color:var(--muted);}
+.bestbox b{color:var(--gold); font-family:'JetBrains Mono',monospace; direction:ltr; font-size:16px;}
+
+/* game */
+#game{max-width:480px;}
+.topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; font-family:'JetBrains Mono',monospace; direction:ltr; font-size:16px;}
+#timeLeft{color:var(--gold);}
+#scoreLive{color:var(--teal);}
+.barwrap{height:6px; background:var(--panel); border-radius:4px; overflow:hidden; margin-bottom:22px;}
+#barfill{height:100%; background:var(--gold); width:100%; transition:width 1s linear;}
+.itemcard{background:var(--panel); border:2px solid var(--line); border-radius:16px; padding:32px 16px; margin-bottom:20px; transition:.15s;}
+.itemcard .emoji{font-size:54px;}
+.itemcard .name{font-size:22px; font-weight:900; margin-top:10px;}
+.itemcard.good{border-color:var(--good); background:rgba(95,216,160,.08);}
+.itemcard.bad{border-color:var(--bad); background:rgba(226,88,107,.08);}
+#feedback{height:18px; font-size:13px; color:var(--muted); margin-bottom:14px;}
+#feedback.good{color:var(--good);}
+#feedback.bad{color:var(--bad);}
+.catgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:9px;}
+.catbtn{background:var(--panel); border:1px solid var(--line); color:var(--text); padding:15px 6px; border-radius:10px; font-family:'Tajawal',sans-serif; font-size:13px; font-weight:700; cursor:pointer;}
+.catbtn:active{border-color:var(--teal); transform:scale(.97);}
+
+/* end */
+#end .rank{font-size:44px; margin-top:6px;}
+#end .score{font-family:'JetBrains Mono',monospace; direction:ltr; font-size:50px; color:var(--gold); margin:8px 0;}
+#end .tier{font-size:19px; font-weight:900; color:var(--teal);}
+#end .stat{color:var(--muted); font-size:14px; margin-top:6px;}
+#showTeacher{margin-top:22px; background:var(--panel); border:1px dashed var(--gold); border-radius:10px; padding:14px; font-size:13px; color:var(--muted);}
+#showTeacher b{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<div class="screen" id="start">
+  <h1>تحديك <span>الفردي</span></h1>
+  <p class="sub">60 ثانية، وحدك مع موبايلك. صنّف كل تطبيق في فئته الصحيحة بأسرع ما تقدر — واعرض نتيجتك لأستاذك في الآخر.</p>
+  <div id="nameRow"><input id="playerName" placeholder="اكتب اسمك" maxlength="20"></div>
+  <button class="bigbtn" onclick="startGame()">ابدأ التحدي</button>
+  <div class="bestbox hidden" id="bestbox">أفضل نتيجة سابقة على هذا الجهاز: <b id="bestScore">0</b></div>
+</div>
+
+<div class="screen hidden" id="game">
+  <div class="topbar">
+    <div id="scoreLive">النقاط: 0</div>
+    <div id="timeLeft">⏱ 60</div>
+  </div>
+  <div class="barwrap"><div id="barfill"></div></div>
+  <div class="itemcard" id="itemCard">
+    <div class="emoji" id="itemEmoji">🌐</div>
+    <div class="name" id="itemName">...</div>
+  </div>
+  <div id="feedback"></div>
+  <div class="catgrid" id="catgrid"></div>
+</div>
+
+<div class="screen hidden" id="end">
+  <div class="rank" id="rankEmoji">🥉</div>
+  <div class="score" id="finalScore">0</div>
+  <div class="tier" id="tierLabel">مبتدئ الشبكة</div>
+  <div class="stat" id="finalStat"></div>
+  <div id="showTeacher">✋ اثبت النتيجة: ارفع موبايلك وأرِ الشاشة لأستاذك الآن قبل ما تعيد المحاولة.</div>
+  <button class="bigbtn" onclick="backToStart()">حاول تاني</button>
+</div>
+
+<script>
+const CATS = [
+  {id:"social", label:"تواصل اجتماعي"},
+  {id:"ecom", label:"تجارة إلكترونية"},
+  {id:"learn", label:"تعليم إلكتروني"},
+  {id:"stream", label:"بث وترفيه"},
+  {id:"comm", label:"اتصالات ومراسلة"},
+  {id:"cloud", label:"تخزين سحابي"},
+  {id:"search", label:"محركات بحث"},
+  {id:"gaming", label:"ألعاب أونلاين"},
+];
+const ITEMS = [
+  {n:"Instagram", e:"📸", c:"social"}, {n:"X (Twitter)", e:"🐦", c:"social"},
+  {n:"TikTok", e:"🎵", c:"social"}, {n:"Facebook", e:"👍", c:"social"},
+  {n:"Amazon", e:"📦", c:"ecom"}, {n:"نون (noon)", e:"🛒", c:"ecom"}, {n:"eBay", e:"🏷️", c:"ecom"},
+  {n:"Coursera", e:"🎓", c:"learn"}, {n:"Google Classroom", e:"🏫", c:"learn"}, {n:"Khan Academy", e:"📘", c:"learn"},
+  {n:"Netflix", e:"🎬", c:"stream"}, {n:"YouTube", e:"▶️", c:"stream"}, {n:"Spotify", e:"🎧", c:"stream"},
+  {n:"WhatsApp", e:"💬", c:"comm"}, {n:"Zoom", e:"📹", c:"comm"}, {n:"Gmail", e:"✉️", c:"comm"},
+  {n:"Google Drive", e:"☁️", c:"cloud"}, {n:"Dropbox", e:"🗂️", c:"cloud"}, {n:"iCloud", e:"🍎", c:"cloud"},
+  {n:"Google Search", e:"🔍", c:"search"}, {n:"Bing", e:"🔎", c:"search"},
+  {n:"Fortnite", e:"🎮", c:"gaming"}, {n:"PUBG Mobile", e:"🕹️", c:"gaming"},
+];
+
+let pool=[], current=null, score=0, correctCount=0, totalCount=0, timeLeft=60, timerInt=null;
+
+function getBest(){ try{ return parseInt(localStorage.getItem('netgame_best')||'0'); }catch(e){ return 0; } }
+function setBest(v){ try{ localStorage.setItem('netgame_best', v); }catch(e){} }
+
+function shuffledPool(){ return [...ITEMS].sort(()=>Math.random()-.5); }
+function renderCatsOnly4(){
+  // show 4 random category buttons including the correct one, for faster mobile tapping
+  const correct = CATS.find(c=>c.id===current.c);
+  const others = CATS.filter(c=>c.id!==current.c).sort(()=>Math.random()-.5).slice(0,3);
+  const options = [correct, ...others].sort(()=>Math.random()-.5);
+  document.getElementById('catgrid').innerHTML = options.map(c=>
+    `<button class="catbtn" onclick="answer('${c.id}')">${c.label}</button>`).join('');
+}
+
+function startGame(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('end').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  pool = shuffledPool(); score=0; correctCount=0; totalCount=0; timeLeft=60;
+  document.getElementById('scoreLive').textContent = 'النقاط: 0';
+  document.getElementById('barfill').style.width='100%';
+  nextItem();
+  clearInterval(timerInt);
+  timerInt = setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timeLeft').textContent = '⏱ '+timeLeft;
+    document.getElementById('barfill').style.width = (timeLeft/60*100)+'%';
+    if(timeLeft<=0) endGame();
+  },1000);
+}
+
+function nextItem(){
+  if(pool.length===0) pool = shuffledPool();
+  current = pool.pop();
+  document.getElementById('itemEmoji').textContent = current.e;
+  document.getElementById('itemName').textContent = current.n;
+  document.getElementById('itemCard').className='itemcard';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='';
+  renderCatsOnly4();
+}
+
+function answer(catId){
+  if(timeLeft<=0) return;
+  totalCount++;
+  const card = document.getElementById('itemCard');
+  const fb = document.getElementById('feedback');
+  const catLabel = CATS.find(c=>c.id===current.c).label;
+  if(catId===current.c){
+    score++; correctCount++;
+    card.className='itemcard good';
+    fb.textContent='✔ صحيح!'; fb.className='good';
+    document.getElementById('scoreLive').textContent='النقاط: '+score;
+  } else {
+    card.className='itemcard bad';
+    fb.textContent='✘ الصحيح: '+catLabel; fb.className='bad';
+  }
+  setTimeout(nextItem, 450);
+}
+
+function tierFor(s){
+  if(s>=18) return {emoji:'🏆', label:'خبير المنصات الرقمية'};
+  if(s>=12) return {emoji:'🥇', label:'مستكشف الإنترنت المتمرس'};
+  if(s>=7)  return {emoji:'🥈', label:'مستخدم واعٍ'};
+  return {emoji:'🥉', label:'مبتدئ الشبكة'};
+}
+
+function endGame(){
+  clearInterval(timerInt);
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('end').classList.remove('hidden');
+  document.getElementById('finalScore').textContent = score;
+  const t = tierFor(score);
+  document.getElementById('rankEmoji').textContent = t.emoji;
+  document.getElementById('tierLabel').textContent = t.label;
+  const acc = totalCount ? Math.round(correctCount/totalCount*100) : 0;
+  document.getElementById('finalStat').textContent = `${totalCount} محاولة — دقة ${acc}%`;
+  const best = getBest();
+  if(score>best) setBest(score);
+}
+
+function backToStart(){
+  document.getElementById('end').classList.add('hidden');
+  document.getElementById('start').classList.remove('hidden');
+  const best = getBest();
+  if(best>0){
+    document.getElementById('bestbox').classList.remove('hidden');
+    document.getElementById('bestScore').textContent = best;
+  }
+}
+
+// init: show best score if exists
+(function(){
+  const best = getBest();
+  if(best>0){
+    document.getElementById('bestbox').classList.remove('hidden');
+    document.getElementById('bestScore').textContent = best;
+  }
+})();
+</script>
+</body>
+</html>
